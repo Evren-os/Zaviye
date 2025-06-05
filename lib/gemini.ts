@@ -17,6 +17,11 @@ export async function generateContent({
     });
 
     if (!response.ok) {
+      // Handle the rate limit error sent from our API route
+      if (response.status === 429) {
+        console.warn("Rate limit hit. Please wait before sending another message.");
+        return "You're sending messages too quickly! Please wait a moment and try again.";
+      }
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
     }
@@ -52,7 +57,7 @@ export async function generateContent({
   }
 }
 
-// Optional: Add a function to check API health
+// Function to check API health
 export async function checkApiHealth(): Promise<boolean> {
   try {
     const response = await fetch("/api/gemini", {
@@ -73,7 +78,7 @@ export async function checkApiHealth(): Promise<boolean> {
   }
 }
 
-// Optional: Add retry logic for failed requests
+// Retry logic for failed requests
 export async function generateContentWithRetry(
   params: GenerateContentParams,
   maxRetries = 3,
