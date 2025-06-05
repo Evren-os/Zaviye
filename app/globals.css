@@ -219,9 +219,17 @@ body {
   }
 }
 
+/* Hide scrollbar for chat messages container */
 .messages-container {
   transition: none;
   scroll-behavior: smooth;
+  /* Hide scrollbar for WebKit browsers (Chrome, Safari, Edge) */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer and Edge */
+}
+
+.messages-container::-webkit-scrollbar {
+  display: none; /* WebKit browsers */
 }
 
 .message-list {
@@ -229,7 +237,9 @@ body {
 }
 
 .message-item {
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
   will-change: transform, opacity;
 }
 
@@ -239,32 +249,10 @@ body {
   perspective: 1000px;
 }
 
-.messages-container {
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(var(--muted-foreground), 0.3) transparent;
-}
-
-.messages-container::-webkit-scrollbar {
-  width: 6px;
-}
-
-.messages-container::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.messages-container::-webkit-scrollbar-thumb {
-  background: rgba(var(--muted-foreground), 0.3);
-  border-radius: 3px;
-}
-
-.messages-container::-webkit-scrollbar-thumb:hover {
-  background: rgba(var(--muted-foreground), 0.5);
-}
-
 .tab-active {
-  box-shadow: inset 0 0 8px rgba(var(--primary), 0.15), 0 0 12px rgba(var(--primary), 0.08);
+  box-shadow:
+    inset 0 0 8px rgba(var(--primary), 0.15),
+    0 0 12px rgba(var(--primary), 0.08);
   border-color: hsl(var(--primary) / 0.3) !important;
 }
 
@@ -303,7 +291,9 @@ body {
 
 .chat-input-focused {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(var(--primary), 0.1), 0 0 0 1px rgba(var(--primary), 0.2);
+  box-shadow:
+    0 4px 12px rgba(var(--primary), 0.1),
+    0 0 0 1px rgba(var(--primary), 0.2);
 }
 
 @keyframes messageSlideIn {
@@ -333,4 +323,49 @@ button {
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
+}
+
+/* Hide scrollbars for all chat-related containers */
+.messages-container,
+[class*="message"],
+[class*="chat"],
+[class*="scroll"],
+.overflow-y-auto,
+.overflow-auto {
+  /* Hide scrollbar for Firefox */
+  scrollbar-width: none;
+  /* Hide scrollbar for IE and Edge */
+  -ms-overflow-style: none;
+}
+
+/* Hide scrollbar for WebKit browsers (Chrome, Safari, Edge) */
+.messages-container::-webkit-scrollbar,
+[class*="message"]::-webkit-scrollbar,
+[class*="chat"]::-webkit-scrollbar,
+[class*="scroll"]::-webkit-scrollbar,
+.overflow-y-auto::-webkit-scrollbar,
+.overflow-auto::-webkit-scrollbar {
+  display: none;
+}
+
+/* More specific targeting for common chat layouts */
+div[class*="flex"][class*="col"]::-webkit-scrollbar,
+div[class*="h-"]::-webkit-scrollbar {
+  display: none;
+}
+
+div[class*="flex"][class*="col"] {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Target any scrollable div in the main content area */
+main *::-webkit-scrollbar,
+.main *::-webkit-scrollbar {
+  display: none;
+}
+
+main * {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
