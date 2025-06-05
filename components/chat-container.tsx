@@ -1,0 +1,91 @@
+"use client"
+
+import { useEffect, useRef, useState } from "react"
+import { ChatInput } from "@/components/chat-input"
+import { ChatMessages } from "@/components/chat-messages"
+import type { ChatType } from "@/lib/types"
+import { useChat } from "@/hooks/use-chat"
+import { introMessages } from "@/lib/system-prompts"
+
+interface ChatContainerProps {
+  activeChat: ChatType
+  setActiveChat: (chat: ChatType) => void
+}
+
+export function ChatContainer({ activeChat, setActiveChat }: ChatContainerProps) {
+  const { messages, isLoading, sendMessage, hasStartedChat } = useChat(activeChat)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsInitialLoad(false)
+    }, 1200)
+
+    return () => clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
+    if (messagesEndRef.current && messagesContainerRef.current) {
+      const container = messagesContainerRef.current
+      const scrollHeight = container.scrollHeight
+      const height = container.clientHeight
+      const maxScrollTop = scrollHeight - height
+
+      if (container.scrollTop > maxScrollTop - 100) {
+        messagesEndRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "end",
+        })
+      }
+    }
+  }, [messages, isLoading])
+
+  return (
+    <>
+      {/* Initial Load Animation */}
+      {isInitialLoad && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/98 backdrop-blur-md">
+          <div className="zaviye-logo-container">
+            <div className="zaviye-logo text-5xl font-bold tracking-tight">Zaviye</div>
+            <div className="zaviye-particles">
+              <div className="particle particle-1"></div>
+              <div className="particle particle-2"></div>
+              <div className="particle particle-3"></div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* No vertical scrolling */}
+      <div className="h-screen w-full flex flex-col overflow-hidden">
+        {/* Messages Container */}
+        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 messages-container">
+          <div className="mx-auto max-w-3xl h-full">
+            <ChatMessages
+              messages={messages}
+              isLoading={isLoading}
+              introMessage={introMessages[activeChat]}
+              hasStartedChat={hasStartedChat}
+              activeChat={activeChat}
+            />
+            <div ref={messagesEndRef} className="h-4 flex-shrink-0" />
+          </div>
+        </div>
+
+        {/* Input Area  */}
+        <div className="flex-shrink-0 p-4 pb-6">
+          <div className="mx-auto max-w-3xl">
+            <ChatInput
+              onSend={sendMessage}
+              isLoading={isLoading}
+              activeChat={activeChat}
+              setActiveChat={setActiveChat}
+            />
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
