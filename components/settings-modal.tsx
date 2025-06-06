@@ -125,7 +125,6 @@ export function SettingsModal({
               </TabsTrigger>
             </TabsList>
 
-            {/* Key Change: Container now has fixed height and handles overflow. Padding is moved inside. */}
             <div className="h-[400px] overflow-y-auto">
               <TabsContent
                 value="general"
@@ -133,7 +132,6 @@ export function SettingsModal({
               >
                 <div className="space-y-6">
                   <Card>
-                    {/* Key Change: Reduced padding for a more compact card */}
                     <CardHeader className="p-4">
                       <CardTitle>Display</CardTitle>
                       <CardDescription>Customize the name of this chat tab.</CardDescription>
@@ -217,7 +215,7 @@ export function SettingsModal({
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmClearHistory}>
-              Yes, Delete History
+              Yes
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
