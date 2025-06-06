@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { SendIcon, ZapIcon, GitBranchIcon, VolumeXIcon } from "lucide-react";
 import type { ChatType } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { useSettings } from "@/hooks/use-settings"; // NEW
+import { useSettings } from "@/hooks/use-settings";
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -20,7 +20,7 @@ export function ChatInput({ onSend, isLoading, activeChat, setActiveChat }: Chat
   const [input, setInput] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { getEffectiveSettings } = useSettings(); // NEW
+  const { getEffectiveSettings } = useSettings();
 
   useEffect(() => {
     if (textareaRef.current) {

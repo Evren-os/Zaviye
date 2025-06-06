@@ -20,15 +20,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
 import { useSettings } from "@/hooks/use-settings";
 import type { ChatType } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -49,12 +50,14 @@ export function SettingsModal({
   const [tabName, setTabName] = useState("");
   const [systemPrompt, setSystemPrompt] = useState("");
   const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [currentTab, setCurrentTab] = useState("general");
 
   useEffect(() => {
     if (isOpen) {
       const currentSettings = getEffectiveSettings(activeChat);
       setTabName(currentSettings.name);
       setSystemPrompt(currentSettings.prompt);
+      setCurrentTab("general");
     }
   }, [isOpen, activeChat, getEffectiveSettings]);
 
@@ -91,25 +94,23 @@ export function SettingsModal({
     onClose();
   };
 
-  const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setSystemPrompt(e.target.value);
-  };
-
-  const noHoverTransform = "transition-none hover:transform-none active:transform-none";
-
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="sm:max-w-2xl w-[95vw] max-h-[90vh] flex flex-col p-0">
-          <DialogHeader className="p-6 pb-4">
+          <DialogHeader className="p-6 pb-4 border-b">
             <DialogTitle>Settings</DialogTitle>
             <DialogDescription>
               Manage settings for the "{getEffectiveSettings(activeChat).name}" chat.
             </DialogDescription>
           </DialogHeader>
 
-          <Tabs defaultValue="general" className="flex-1 flex flex-col min-h-0 px-6">
-            <TabsList className="grid w-full grid-cols-2 bg-transparent p-0 h-auto border-b rounded-none">
+          <Tabs
+            value={currentTab}
+            onValueChange={setCurrentTab}
+            className="flex-1 flex flex-col min-h-0"
+          >
+            <TabsList className="grid w-full grid-cols-2 bg-transparent p-0 h-auto rounded-none border-b px-6">
               <TabsTrigger
                 value="general"
                 className="rounded-none data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:text-primary"
@@ -124,51 +125,61 @@ export function SettingsModal({
               </TabsTrigger>
             </TabsList>
 
-            <div className="flex-1 mt-4 min-h-[320px] overflow-hidden">
+            {/* Key Change: Container now has fixed height and handles overflow. Padding is moved inside. */}
+            <div className="h-[400px] overflow-y-auto">
               <TabsContent
                 value="general"
-                className="h-full data-[state=inactive]:hidden data-[state=active]:animate-in data-[state=active]:fade-in-0"
+                className="mt-0 h-full p-6 data-[state=inactive]:hidden data-[state=active]:animate-in data-[state=active]:fade-in-50"
               >
-                <div className="space-y-8 pt-2 pr-1">
-                  <div className="space-y-2">
-                    <Label htmlFor="tab-name">Tab Name</Label>
-                    <Input
-                      id="tab-name"
-                      value={tabName}
-                      onChange={(e) => setTabName(e.target.value)}
-                      placeholder="e.g., Glitch, My Custom Chat"
-                    />
-                  </div>
-                  <div className="space-y-4 rounded-lg border border-destructive/50 p-4">
-                    <div className="space-y-1">
-                      <h3 className="font-semibold text-destructive">Danger Zone</h3>
-                      <p className="text-sm text-muted-foreground">
+                <div className="space-y-6">
+                  <Card>
+                    {/* Key Change: Reduced padding for a more compact card */}
+                    <CardHeader className="p-4">
+                      <CardTitle>Display</CardTitle>
+                      <CardDescription>Customize the name of this chat tab.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-4 pt-0">
+                      <div className="space-y-2">
+                        <Label htmlFor="tab-name">Tab Name</Label>
+                        <Input
+                          id="tab-name"
+                          value={tabName}
+                          onChange={(e) => setTabName(e.target.value)}
+                          placeholder="e.g., Glitch, My Custom Chat"
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-destructive">
+                    <CardHeader className="p-4">
+                      <CardTitle>Danger Zone</CardTitle>
+                      <CardDescription>
                         This action is permanent and cannot be undone.
-                      </p>
-                    </div>
-                    <Button
-                      variant="destructive"
-                      onClick={() => setIsAlertOpen(true)}
-                      className={noHoverTransform}
-                    >
-                      Clear Chat History
-                    </Button>
-                  </div>
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-4 pt-0">
+                      <Button
+                        variant="destructive"
+                        onClick={() => setIsAlertOpen(true)}
+                        className="w-full sm:w-auto"
+                      >
+                        Delete Chat History
+                      </Button>
+                    </CardContent>
+                  </Card>
                 </div>
               </TabsContent>
 
-              {/* System Prompt Tab */}
               <TabsContent
                 value="prompt"
-                className="h-full flex flex-col space-y-2 data-[state=inactive]:hidden data-[state=active]:animate-in data-[state=active]:fade-in-0"
+                className="mt-0 h-full flex flex-col space-y-2 p-6 data-[state=inactive]:hidden data-[state=active]:animate-in data-[state=active]:fade-in-50"
               >
-                <Label htmlFor="system-prompt" className="pt-2">
-                  Prompt
-                </Label>
+                <Label htmlFor="system-prompt">Prompt</Label>
                 <Textarea
                   id="system-prompt"
                   value={systemPrompt}
-                  onChange={handlePromptChange}
+                  onChange={(e) => setSystemPrompt(e.target.value)}
                   placeholder="Enter the system prompt for the AI..."
                   className="flex-1 resize-none text-xs font-mono"
                 />
@@ -176,17 +187,17 @@ export function SettingsModal({
             </div>
           </Tabs>
 
-          <DialogFooter className="p-6 pt-4 border-t mt-4 flex-row justify-between items-center">
-            <Button variant="ghost" onClick={handleReset} className={noHoverTransform}>
+          <DialogFooter className="p-6 border-t flex flex-col-reverse sm:flex-row sm:justify-between sm:items-center gap-2">
+            <Button variant="ghost" onClick={handleReset} className="w-full sm:w-auto">
               Reset to Default
             </Button>
-            <div className="flex gap-2">
+            <div className="flex flex-col-reverse sm:flex-row gap-2 w-full sm:w-auto">
               <DialogClose asChild>
-                <Button variant="outline" className={noHoverTransform}>
+                <Button variant="outline" className="w-full sm:w-auto">
                   Cancel
                 </Button>
               </DialogClose>
-              <Button onClick={handleSave} className={noHoverTransform}>
+              <Button onClick={handleSave} className="w-full sm:w-auto">
                 Save Changes
               </Button>
             </div>
@@ -194,7 +205,6 @@ export function SettingsModal({
         </DialogContent>
       </Dialog>
 
-      {/* Confirmation Dialog for Clearing History */}
       <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -205,9 +215,9 @@ export function SettingsModal({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className={noHoverTransform}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmClearHistory} className={noHoverTransform}>
-              Yes
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmClearHistory}>
+              Yes, Delete History
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
