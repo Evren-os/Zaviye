@@ -1,50 +1,58 @@
-"use client"
+"use client";
 
-import { useEffect, useRef, useState } from "react"
-import { ChatInput } from "@/components/chat-input"
-import { ChatMessages } from "@/components/chat-messages"
-import type { ChatType } from "@/lib/types"
-import { useChat } from "@/hooks/use-chat"
-import { introMessages } from "@/lib/system-prompts"
+import { useEffect, useRef, useState } from "react";
+import { ChatInput } from "@/components/chat-input";
+import { ChatMessages } from "@/components/chat-messages";
+import type { ChatType } from "@/lib/types";
+import { useChat } from "@/hooks/use-chat";
+import { introMessages } from "@/lib/system-prompts";
+import { SettingsModal } from "./settings-modal";
+import { Button } from "./ui/button";
+import { SettingsIcon } from "lucide-react";
+import { useSettings } from "@/hooks/use-settings";
 
 interface ChatContainerProps {
-  activeChat: ChatType
-  setActiveChat: (chat: ChatType) => void
+  activeChat: ChatType;
+  setActiveChat: (chat: ChatType) => void;
 }
 
 export function ChatContainer({ activeChat, setActiveChat }: ChatContainerProps) {
-  const { messages, isLoading, sendMessage, hasStartedChat } = useChat(activeChat)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const messagesContainerRef = useRef<HTMLDivElement>(null)
-  const [isInitialLoad, setIsInitialLoad] = useState(true)
+  const { messages, isLoading, sendMessage, hasStartedChat, clearChatHistory } =
+    useChat(activeChat);
+  const { getEffectiveSettings } = useSettings();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setIsInitialLoad(false)
-    }, 1200)
-
-    return () => clearTimeout(timer)
-  }, [])
+      setIsInitialLoad(false);
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (messagesEndRef.current && messagesContainerRef.current) {
-      const container = messagesContainerRef.current
-      const scrollHeight = container.scrollHeight
-      const height = container.clientHeight
-      const maxScrollTop = scrollHeight - height
-
+      const container = messagesContainerRef.current;
+      const scrollHeight = container.scrollHeight;
+      const height = container.clientHeight;
+      const maxScrollTop = scrollHeight - height;
       if (container.scrollTop > maxScrollTop - 100) {
-        messagesEndRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "end",
-        })
+        messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
       }
     }
-  }, [messages, isLoading])
+  }, [messages, isLoading]);
 
   return (
     <>
-      {/* Initial Load Animation */}
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        activeChat={activeChat}
+        clearChatHistory={clearChatHistory}
+      />
+
       {isInitialLoad && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/98 backdrop-blur-md">
           <div className="zaviye-logo-container">
@@ -58,9 +66,19 @@ export function ChatContainer({ activeChat, setActiveChat }: ChatContainerProps)
         </div>
       )}
 
-      {/* No vertical scrolling */}
-      <div className="h-screen w-full flex flex-col overflow-hidden">
-        {/* Messages Container */}
+      <div className="h-screen w-full flex flex-col overflow-hidden relative">
+        <header className="absolute top-0 left-0 p-4 z-10">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsSettingsOpen(true)}
+            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+          >
+            <SettingsIcon className="h-5 w-5" />
+            <span className="sr-only">Open Settings</span>
+          </Button>
+        </header>
+
         <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 messages-container">
           <div className="mx-auto max-w-3xl h-full">
             <ChatMessages
@@ -74,7 +92,6 @@ export function ChatContainer({ activeChat, setActiveChat }: ChatContainerProps)
           </div>
         </div>
 
-        {/* Input Area  */}
         <div className="flex-shrink-0 p-4 pb-6">
           <div className="mx-auto max-w-3xl">
             <ChatInput
@@ -87,5 +104,5 @@ export function ChatContainer({ activeChat, setActiveChat }: ChatContainerProps)
         </div>
       </div>
     </>
-  )
+  );
 }

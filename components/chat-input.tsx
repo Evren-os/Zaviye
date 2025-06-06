@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { SendIcon, ZapIcon, GitBranchIcon, VolumeXIcon } from "lucide-react";
 import type { ChatType } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { useSettings } from "@/hooks/use-settings"; // NEW
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -19,6 +20,7 @@ export function ChatInput({ onSend, isLoading, activeChat, setActiveChat }: Chat
   const [input, setInput] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { getEffectiveSettings } = useSettings(); // NEW
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -50,9 +52,21 @@ export function ChatInput({ onSend, isLoading, activeChat, setActiveChat }: Chat
   };
 
   const tabs: { id: ChatType; label: string; icon: React.ReactNode }[] = [
-    { id: "glitch", label: "Glitch", icon: <ZapIcon className="h-4 w-4" /> },
-    { id: "blame", label: "Blame", icon: <GitBranchIcon className="h-4 w-4" /> },
-    { id: "reson", label: "Reson", icon: <VolumeXIcon className="h-4 w-4" /> },
+    {
+      id: "glitch",
+      label: getEffectiveSettings("glitch").name,
+      icon: <ZapIcon className="h-4 w-4" />,
+    },
+    {
+      id: "blame",
+      label: getEffectiveSettings("blame").name,
+      icon: <GitBranchIcon className="h-4 w-4" />,
+    },
+    {
+      id: "reson",
+      label: getEffectiveSettings("reson").name,
+      icon: <VolumeXIcon className="h-4 w-4" />,
+    },
   ];
 
   return (
@@ -64,7 +78,6 @@ export function ChatInput({ onSend, isLoading, activeChat, setActiveChat }: Chat
           isFocused ? "ring-2 ring-primary/20 border-primary/30" : "border-border",
         )}
       >
-        {/* Typing area */}
         <div className="relative p-4">
           <Textarea
             ref={textareaRef}
@@ -79,9 +92,7 @@ export function ChatInput({ onSend, isLoading, activeChat, setActiveChat }: Chat
           />
         </div>
 
-        {/* Bottom area with tabs and send button */}
         <div className="flex items-center justify-between p-3 pt-0">
-          {/* Chat tabs */}
           <div className="flex items-center gap-2">
             {tabs.map((tab) => (
               <button
@@ -95,7 +106,6 @@ export function ChatInput({ onSend, isLoading, activeChat, setActiveChat }: Chat
                     : "text-muted-foreground hover:bg-muted/30 hover:text-foreground border border-transparent hover:border-muted/30",
                 )}
               >
-                {/* Glow effect for active tab */}
                 {activeChat === tab.id && (
                   <>
                     <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 rounded-lg animate-pulse" />
@@ -109,7 +119,6 @@ export function ChatInput({ onSend, isLoading, activeChat, setActiveChat }: Chat
             ))}
           </div>
 
-          {/* Send button */}
           <Button
             type="submit"
             size="sm"
