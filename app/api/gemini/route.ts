@@ -10,7 +10,6 @@ const MODEL_NAME = "gemini-2.0-flash";
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
 
 export async function POST(request: NextRequest) {
-  
   const ip = request.ip ?? request.headers.get("x-forwarded-for") ?? "127.0.0.1";
   const now = Date.now();
 
@@ -44,9 +43,12 @@ export async function POST(request: NextRequest) {
       contents: [
         {
           role: "user",
-          parts: [{ text: `${systemPrompt}\n\nUser: ${userPrompt}` }],
+          parts: [{ text: userPrompt }],
         },
       ],
+      system_instruction: {
+        parts: [{ text: systemPrompt }],
+      },
       generationConfig: {
         temperature: 0.7,
         topK: 40,
