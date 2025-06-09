@@ -6,7 +6,7 @@ import { ChatMessages } from "@/components/chat-messages";
 import type { ChatType } from "@/lib/types";
 import { useChat } from "@/hooks/use-chat";
 import { introMessages } from "@/lib/system-prompts";
-import { SettingsModal } from "./settings-modal";
+import { SettingsModal } from "./settings/settings-modal";
 import { Button } from "./ui/button";
 import { SettingsIcon } from "lucide-react";
 import { useSettings } from "@/hooks/use-settings";

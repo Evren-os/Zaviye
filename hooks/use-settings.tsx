@@ -10,7 +10,6 @@ const DEFAULT_SETTINGS: AllChatSettings = {
   reson: { name: "Reson", prompt: systemPrompts.reson },
 };
 
-// Define a key for localStorage
 const SETTINGS_STORAGE_KEY = "zaviye-chat-settings";
 
 interface SettingsContextType {
@@ -23,40 +22,48 @@ interface SettingsContextType {
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export const SettingsProvider = ({ children }: { children: React.ReactNode }) => {
-  // Initialize state from a function that reads from localStorage
-  const [customSettings, setCustomSettings] = useState<Partial<AllChatSettings>>(() => {
-    // Runs only on the initial render
+  const [customSettings, setCustomSettings] = useState<Partial<AllChatSettings>>({});
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Load from localStorage only on the client, after the component has mounted.
+  useEffect(() => {
+    setIsMounted(true);
     try {
       const savedSettings = window.localStorage.getItem(SETTINGS_STORAGE_KEY);
-      return savedSettings ? JSON.parse(savedSettings) : {};
+      if (savedSettings) {
+        setCustomSettings(JSON.parse(savedSettings));
+      }
     } catch (error) {
       console.error("Failed to load settings from localStorage:", error);
-      return {};
     }
-  });
+  }, []);
 
-  // Effect to save settings to localStorage whenever they change
+  // Save to localStorage whenever customSettings change.
   useEffect(() => {
+    if (!isMounted) return;
+
     try {
-      // Don't save an empty object
       if (Object.keys(customSettings).length > 0) {
         window.localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(customSettings));
       } else {
-        // If custom settings are empty, remove the key from storage
         window.localStorage.removeItem(SETTINGS_STORAGE_KEY);
       }
     } catch (error) {
       console.error("Failed to save settings to localStorage:", error);
     }
-  }, [customSettings]);
+  }, [customSettings, isMounted]);
 
   const getEffectiveSettings = useCallback(
     (chatType: ChatType): ChatSettings => {
+      // On the server or before the client has mounted, always return default settings.
+      if (!isMounted) {
+        return DEFAULT_SETTINGS[chatType];
+      }
       const defaults = DEFAULT_SETTINGS[chatType];
       const customs = customSettings[chatType] || {};
       return { ...defaults, ...customs };
     },
-    [customSettings],
+    [customSettings, isMounted],
   );
 
   const updateSettings = (chatType: ChatType, newSettings: Partial<ChatSettings>) => {
