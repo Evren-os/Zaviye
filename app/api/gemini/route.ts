@@ -3,10 +3,10 @@ import { NextRequest, NextResponse } from "next/server";
 // In-memory store for rate limiting. Resets on cold starts.
 const rateLimitStore = new Map<string, { count: number; lastRequest: number }>();
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
-const RATE_LIMIT_MAX_REQUESTS = 7; // Max 7 requests per minute from a single IP
+const RATE_LIMIT_MAX_REQUESTS = 4; // Max 4 requests per minute from a single IP
 
 const API_KEY = process.env.GEMINI_API_KEY || "";
-const MODEL_NAME = "gemini-2.0-flash";
+const MODEL_NAME = "gemini-2.5-flash-preview-05-20";
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
 
 export async function POST(request: NextRequest) {
