@@ -13,8 +13,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import type { ChatType } from "@/lib/types"; // NEW
 
 interface SettingsDataProps {
+  activeChat: ChatType; // NEW
   clearChatHistory: () => void;
   onClose: () => void;
 }
@@ -28,7 +30,7 @@ const SettingItem = ({
   description: string;
   control: React.ReactNode;
 }) => (
-  <div className="flex items-start justify-between rounded-lg p-4 transition-colors hover:bg-muted/50">
+  <div className="flex items-start justify-between rounded-lg p-4 transition-colors hover:bg-muted/50 border-b last:border-b-0">
     <div className="space-y-1 pr-4">
       <p className="font-medium">{title}</p>
       <p className="text-sm text-muted-foreground">{description}</p>
@@ -37,7 +39,8 @@ const SettingItem = ({
   </div>
 );
 
-export function SettingsData({ clearChatHistory, onClose }: SettingsDataProps) {
+export function SettingsData({ activeChat, clearChatHistory, onClose }: SettingsDataProps) {
+  // UPDATED
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const { toast } = useToast();
 
@@ -52,13 +55,65 @@ export function SettingsData({ clearChatHistory, onClose }: SettingsDataProps) {
     onClose();
   };
 
+  // NEW: Export chat history function
+  const handleExportHistory = () => {
+    try {
+      const savedMessages = localStorage.getItem(`zaviye-${activeChat}-messages`);
+      if (!savedMessages || JSON.parse(savedMessages).length === 0) {
+        toast({
+          title: "No History to Export",
+          description: "There are no messages to export for this tab.",
+          variant: "destructive",
+          duration: 3000,
+        });
+        return;
+      }
+
+      const blob = new Blob([savedMessages], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `zaviye-${activeChat}-history-${new Date().toISOString()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "✅ Export Successful",
+        description: "Your chat history has been downloaded.",
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error("Export failed:", error);
+      toast({
+        title: "❌ Export Failed",
+        description: "Could not export chat history.",
+        variant: "destructive",
+        duration: 3000,
+      });
+    }
+  };
+
   return (
     <>
-      <div className="p-6 space-y-4">
-        <div className="space-y-2">
+      <div className="p-6 space-y-0">
+        {" "}
+        {/* UPDATED: space-y-0 */}
+        <div className="border rounded-lg">
+          {/* NEW: Export Setting Item */}
+          <SettingItem
+            title="Export Chat History"
+            description="Download a JSON file of your complete conversation history for the current chat tab."
+            control={
+              <Button variant="outline" size="sm" onClick={handleExportHistory}>
+                Export
+              </Button>
+            }
+          />
           <SettingItem
             title="Delete All Conversations"
-            description="Permanently delete all of your conversation data for the current chat tab. This action is immediate and cannot be undone."
+            description="Permanently delete all of your conversation data for the current chat tab. This action cannot be undone."
             control={
               <Button variant="destructive" size="sm" onClick={() => setIsAlertOpen(true)}>
                 Delete
@@ -78,7 +133,10 @@ export function SettingsData({ clearChatHistory, onClose }: SettingsDataProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmClearHistory}>Yes, Delete</AlertDialogAction>
+            {/* UPDATED: Destructive variant and more descriptive text */}
+            <AlertDialogAction variant="destructive" onClick={handleConfirmClearHistory}>
+              Yes, delete history
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

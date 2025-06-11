@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,6 +18,14 @@ export function SettingsCustomization({
   systemPrompt,
   setSystemPrompt,
 }: SettingsCustomizationProps) {
+  // NEW: Memoized calculation for prompt stats
+  const { promptLines, promptChars } = useMemo(() => {
+    return {
+      promptLines: systemPrompt.split("\n").length,
+      promptChars: systemPrompt.length,
+    };
+  }, [systemPrompt]);
+
   return (
     <div className="p-6 h-full flex flex-col gap-6">
       <div className="space-y-2">
@@ -29,7 +38,13 @@ export function SettingsCustomization({
         />
       </div>
       <div className="space-y-2 flex-1 flex flex-col">
-        <Label htmlFor="system-prompt">System Prompt</Label>
+        <div className="flex justify-between items-center">
+          <Label htmlFor="system-prompt">System Prompt</Label>
+          {/* NEW: Prompt stats display */}
+          <div className="text-xs text-muted-foreground font-mono">
+            {promptLines} lines / {promptChars} chars
+          </div>
+        </div>
         <Textarea
           id="system-prompt"
           value={systemPrompt}
