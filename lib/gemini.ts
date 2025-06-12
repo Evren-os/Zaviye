@@ -17,13 +17,8 @@ export async function generateContent({
     });
 
     if (!response.ok) {
-      // Handle the rate limit error sent from our API route
-      if (response.status === 429) {
-        console.warn("Rate limit hit. Please wait before sending another message.");
-        return "You're sending messages too quickly! Please wait a moment and try again.";
-      }
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      throw new Error(errorData.error || `API Error: Status ${response.status}`);
     }
 
     const data = await response.json();
@@ -34,26 +29,11 @@ export async function generateContent({
 
     return data.text;
   } catch (error) {
-    console.error("Error generating content:", error);
-
-    // Provide more specific error messages based on the error type
-    if (error instanceof TypeError && error.message.includes("fetch")) {
-      return "Network error: Unable to connect to the AI service. Please check your internet connection and try again.";
+    console.error("Error in generateContent:", error);
+    if (error instanceof Error) {
+      throw error;
     }
-
-    if (error instanceof Error && error.message.includes("HTTP error! status: 401")) {
-      return "Authentication error: Invalid API key. Please contact support.";
-    }
-
-    if (error instanceof Error && error.message.includes("HTTP error! status: 429")) {
-      return "Rate limit exceeded: Too many requests. Please wait a moment and try again.";
-    }
-
-    if (error instanceof Error && error.message.includes("HTTP error! status: 500")) {
-      return "Server error: The AI service is temporarily unavailable. Please try again in a few moments.";
-    }
-
-    return "Sorry, I encountered an error while processing your request. Please try again.";
+    throw new Error("An unknown error occurred.");
   }
 }
 
@@ -92,14 +72,12 @@ export async function generateContentWithRetry(
       lastError = error as Error;
       console.warn(`Attempt ${attempt} failed:`, error);
 
-      // Don't retry on authentication errors
       if (error instanceof Error && error.message.includes("401")) {
         break;
       }
 
-      // Wait before retrying (exponential backoff)
       if (attempt < maxRetries) {
-        const delay = Math.pow(2, attempt - 1) * 1000; // 1s, 2s, 4s
+        const delay = Math.pow(2, attempt - 1) * 1000;
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }

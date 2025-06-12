@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { toast } from "sonner";
 import type { Message, ChatType } from "@/lib/types";
 import { generateContent } from "@/lib/gemini";
 import { useSettings } from "@/hooks/use-settings";
@@ -58,20 +59,19 @@ export function useChat(chatType: ChatType) {
       };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
-      console.error("Error sending message:", error);
-      const errorMessage: Message = {
-        id: generateId(),
-        role: "assistant",
-        content: "Sorry, I encountered an error. Please try again.",
-        timestamp: Date.now(),
-      };
-      setMessages((prev) => [...prev, errorMessage]);
+      // Catch the error and display a toast notification
+      if (error instanceof Error) {
+        toast.error(error.message, {
+          duration: 1500,
+        });
+      }
+      // Remove the last user message on error
+      setMessages((prev) => prev.slice(0, -1));
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Function to clear messages for the current chat
   const clearChatHistory = useCallback(() => {
     setMessages([]);
     setHasStartedChat(false);
