@@ -13,10 +13,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import type { ChatType } from "@/lib/types"; // NEW
+import type { ChatType } from "@/lib/types";
 
 interface SettingsDataProps {
-  activeChat: ChatType; // NEW
+  activeChat: ChatType;
   clearChatHistory: () => void;
   onClose: () => void;
 }
@@ -40,7 +40,6 @@ const SettingItem = ({
 );
 
 export function SettingsData({ activeChat, clearChatHistory, onClose }: SettingsDataProps) {
-  // UPDATED
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const { toast } = useToast();
 
@@ -55,7 +54,6 @@ export function SettingsData({ activeChat, clearChatHistory, onClose }: Settings
     onClose();
   };
 
-  // NEW: Export chat history function
   const handleExportHistory = () => {
     try {
       const savedMessages = localStorage.getItem(`zaviye-${activeChat}-messages`);
@@ -99,9 +97,7 @@ export function SettingsData({ activeChat, clearChatHistory, onClose }: Settings
     <>
       <div className="p-6 space-y-0">
         {" "}
-        {/* UPDATED: space-y-0 */}
         <div className="border rounded-lg">
-          {/* NEW: Export Setting Item */}
           <SettingItem
             title="Export Chat History"
             description="Download a JSON file of your complete conversation history for the current chat tab."
@@ -133,7 +129,6 @@ export function SettingsData({ activeChat, clearChatHistory, onClose }: Settings
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            {/* UPDATED: Destructive variant and more descriptive text */}
             <AlertDialogAction variant="destructive" onClick={handleConfirmClearHistory}>
               Yes, delete history
             </AlertDialogAction>

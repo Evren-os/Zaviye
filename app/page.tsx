@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { ChatContainer } from "@/components/chat-container";
 import type { ChatType } from "@/lib/types";
-import { SettingsProvider } from "@/hooks/use-settings"; // NEW
+import { SettingsProvider } from "@/hooks/use-settings";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function Home() {
   const [activeChat, setActiveChat] = useState<ChatType>("glitch");
@@ -17,6 +18,7 @@ export default function Home() {
       <main className="flex min-h-screen flex-col items-center justify-between bg-background">
         <ChatContainer activeChat={activeChat} setActiveChat={setActiveChat} />
       </main>
+      <Toaster richColors position="top-center" />
     </SettingsProvider>
   );
 }

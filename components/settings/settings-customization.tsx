@@ -18,7 +18,6 @@ export function SettingsCustomization({
   systemPrompt,
   setSystemPrompt,
 }: SettingsCustomizationProps) {
-  // NEW: Memoized calculation for prompt stats
   const { promptLines, promptChars } = useMemo(() => {
     return {
       promptLines: systemPrompt.split("\n").length,
@@ -40,7 +39,6 @@ export function SettingsCustomization({
       <div className="space-y-2 flex-1 flex flex-col">
         <div className="flex justify-between items-center">
           <Label htmlFor="system-prompt">System Prompt</Label>
-          {/* NEW: Prompt stats display */}
           <div className="text-xs text-muted-foreground font-mono">
             {promptLines} lines / {promptChars} chars
           </div>

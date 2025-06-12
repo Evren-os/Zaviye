@@ -77,24 +77,6 @@ body {
   ring-offset: 0 !important;
 }
 
-.copy-toast {
-  position: fixed;
-  bottom: 180px !important;
-  right: 20px !important;
-  animation: slideInRight 0.3s ease-out;
-}
-
-@keyframes slideInRight {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
 .messages-container {
   transition: none;
   scroll-behavior: smooth;

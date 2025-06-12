@@ -14,7 +14,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { SettingsSidebar, type SettingsTab } from "./settings-sidebar";
 import { SettingsCustomization } from "./settings-customization";
 import { SettingsData } from "./settings-data";
-import { ArrowLeft, RotateCcw } from "lucide-react"; // UPDATED
+import { ArrowLeft, RotateCcw } from "lucide-react";
 import type { ChatType } from "@/lib/types";
 import { useSettings } from "@/hooks/use-settings";
 import { useToast } from "@/hooks/use-toast";
@@ -39,34 +39,27 @@ export function SettingsModal({
   const [activeTab, setActiveTab] = useState<SettingsTab>("customization");
   const [mobileView, setMobileView] = useState<"sidebar" | "content">("sidebar");
 
-  // Form state
   const [tabName, setTabName] = useState("");
   const [systemPrompt, setSystemPrompt] = useState("");
 
-  // NEW: State to track initial values for dirty checking
   const [initialTabName, setInitialTabName] = useState("");
   const [initialSystemPrompt, setInitialSystemPrompt] = useState("");
 
-  // NEW: Determine if the form is dirty
   const isDirty = tabName !== initialTabName || systemPrompt !== initialSystemPrompt;
 
-  // Populate form state when modal opens or active chat changes
   useEffect(() => {
     if (isOpen) {
       const currentSettings = getEffectiveSettings(activeChat);
       setTabName(currentSettings.name);
       setSystemPrompt(currentSettings.prompt);
 
-      // NEW: Set initial state for dirty checking
       setInitialTabName(currentSettings.name);
       setInitialSystemPrompt(currentSettings.prompt);
 
-      // Reset to customization tab on open
       setActiveTab("customization");
     }
   }, [isOpen, activeChat, getEffectiveSettings]);
 
-  // Reset mobile view when modal is closed or on screen resize
   useEffect(() => {
     if (!isOpen || !isMobile) {
       setMobileView("sidebar");
@@ -81,7 +74,7 @@ export function SettingsModal({
   };
 
   const handleSave = () => {
-    if (!isDirty) return; // NEW: Prevent saving if no changes
+    if (!isDirty) return;
     updateSettings(activeChat, { name: tabName, prompt: systemPrompt });
     toast({
       title: "✅ Settings Saved",
@@ -92,11 +85,9 @@ export function SettingsModal({
   };
 
   const handleReset = () => {
-    // We need to get the default settings again after resetting
     const defaultSettings = getEffectiveSettings(activeChat);
     setTabName(defaultSettings.name);
     setSystemPrompt(defaultSettings.prompt);
-    // This is a soft reset of the form, actual reset happens on save
     toast({
       title: "↩️ Form Reset",
       description:
@@ -144,7 +135,6 @@ export function SettingsModal({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-4xl w-[95vw] h-[90vh] max-h-[700px] p-0 flex flex-col gap-0">
-        {/* UPDATED: Made DialogHeader visible and dynamic */}
         <DialogHeader className="p-6 pb-0">
           <DialogTitle className="text-xl">
             Settings for{" "}
@@ -188,7 +178,6 @@ export function SettingsModal({
               <Button variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              {/* UPDATED: Disabled state based on isDirty */}
               <Button onClick={handleSave} disabled={!isDirty}>
                 Save Changes
               </Button>
