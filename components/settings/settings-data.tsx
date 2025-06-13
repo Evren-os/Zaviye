@@ -17,8 +17,8 @@ import type { ChatType } from "@/lib/types";
 
 interface SettingsDataProps {
   activeChat: ChatType;
-  clearChatHistory: () => void;
-  onClose: () => void;
+  clearChatHistoryAction: () => void;
+  onCloseAction: () => void;
 }
 
 const SettingItem = ({
@@ -39,19 +39,23 @@ const SettingItem = ({
   </div>
 );
 
-export function SettingsData({ activeChat, clearChatHistory, onClose }: SettingsDataProps) {
+export function SettingsData({
+  activeChat,
+  clearChatHistoryAction,
+  onCloseAction,
+}: SettingsDataProps) {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const { toast } = useToast();
 
   const handleConfirmClearHistory = () => {
-    clearChatHistory();
+    clearChatHistoryAction();
     toast({
       title: "🗑️ Chat History Cleared",
       description: "The conversation has been permanently deleted.",
       duration: 3000,
     });
     setIsAlertOpen(false);
-    onClose();
+    onCloseAction();
   };
 
   const handleExportHistory = () => {

@@ -21,16 +21,16 @@ import { useToast } from "@/hooks/use-toast";
 
 interface SettingsModalProps {
   isOpen: boolean;
-  onClose: () => void;
+  onCloseAction: () => void;
   activeChat: ChatType;
-  clearChatHistory: () => void;
+  clearChatHistoryAction: () => void;
 }
 
 export function SettingsModal({
   isOpen,
-  onClose,
+  onCloseAction,
   activeChat,
-  clearChatHistory,
+  clearChatHistoryAction,
 }: SettingsModalProps) {
   const isMobile = useIsMobile();
   const { getEffectiveSettings, updateSettings, resetSettings } = useSettings();
@@ -81,7 +81,7 @@ export function SettingsModal({
       description: "Your changes have been saved to this browser.",
       duration: 3000,
     });
-    onClose();
+    onCloseAction();
   };
 
   const handleReset = () => {
@@ -114,17 +114,17 @@ export function SettingsModal({
         return (
           <SettingsCustomization
             tabName={tabName}
-            setTabName={setTabName}
+            onTabNameChangeAction={setTabName}
             systemPrompt={systemPrompt}
-            setSystemPrompt={setSystemPrompt}
+            onSystemPromptChangeAction={setSystemPrompt}
           />
         );
       case "data":
         return (
           <SettingsData
             activeChat={activeChat}
-            clearChatHistory={clearChatHistory}
-            onClose={onClose}
+            clearChatHistoryAction={clearChatHistoryAction}
+            onCloseAction={onCloseAction}
           />
         );
       default:
@@ -133,7 +133,7 @@ export function SettingsModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onCloseAction}>
       <DialogContent className="sm:max-w-4xl w-[95vw] h-[90vh] max-h-[700px] p-0 flex flex-col gap-0">
         <DialogHeader className="p-6 pb-0">
           <DialogTitle className="text-xl">
@@ -148,7 +148,7 @@ export function SettingsModal({
         <div className="flex flex-1 min-h-0 pt-4">
           {isMobile ? (
             mobileView === "sidebar" ? (
-              <SettingsSidebar activeTab={activeTab} onTabChange={handleTabChange} />
+              <SettingsSidebar activeTab={activeTab} onTabChangeAction={handleTabChange} />
             ) : (
               <div className="w-full flex flex-col">
                 <div className="p-2 border-b">
@@ -162,7 +162,7 @@ export function SettingsModal({
             )
           ) : (
             <>
-              <SettingsSidebar activeTab={activeTab} onTabChange={handleTabChange} />
+              <SettingsSidebar activeTab={activeTab} onTabChangeAction={handleTabChange} />
               <div className="flex-1 overflow-y-auto border-l">{renderContent()}</div>
             </>
           )}
@@ -175,7 +175,7 @@ export function SettingsModal({
               Reset to Default
             </Button>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={onClose}>
+              <Button variant="outline" onClick={onCloseAction}>
                 Cancel
               </Button>
               <Button onClick={handleSave} disabled={!isDirty}>

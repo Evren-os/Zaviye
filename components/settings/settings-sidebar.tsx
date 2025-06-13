@@ -8,7 +8,7 @@ export type SettingsTab = "customization" | "data";
 
 interface SettingsSidebarProps {
   activeTab: SettingsTab;
-  onTabChange: (tab: SettingsTab) => void;
+  onTabChangeAction: (tab: SettingsTab) => void;
 }
 
 const tabs = [
@@ -16,7 +16,7 @@ const tabs = [
   { id: "data", label: "Data Controls", icon: Database },
 ];
 
-export function SettingsSidebar({ activeTab, onTabChange }: SettingsSidebarProps) {
+export function SettingsSidebar({ activeTab, onTabChangeAction }: SettingsSidebarProps) {
   return (
     <nav className="p-4 w-full md:w-56 md:border-r">
       <h2 className="mb-4 text-lg font-semibold tracking-tight px-2">Settings</h2>
@@ -29,7 +29,7 @@ export function SettingsSidebar({ activeTab, onTabChange }: SettingsSidebarProps
               "w-full justify-start",
               activeTab === tab.id && "bg-muted hover:bg-muted",
             )}
-            onClick={() => onTabChange(tab.id as SettingsTab)}
+            onClick={() => onTabChangeAction(tab.id as SettingsTab)}
           >
             <tab.icon className="mr-2 h-4 w-4" />
             {tab.label}

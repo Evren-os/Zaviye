@@ -9,17 +9,21 @@ import { introMessages } from "@/lib/system-prompts";
 import { SettingsModal } from "./settings/settings-modal";
 import { Button } from "./ui/button";
 import { SettingsIcon } from "lucide-react";
-import { useSettings } from "@/hooks/use-settings";
 
 interface ChatContainerProps {
   activeChat: ChatType;
-  setActiveChat: (chat: ChatType) => void;
+  onChatChangeAction: (chat: ChatType) => void;
 }
 
-export function ChatContainer({ activeChat, setActiveChat }: ChatContainerProps) {
-  const { messages, isLoading, sendMessage, hasStartedChat, clearChatHistory } =
-    useChat(activeChat);
-  const { getEffectiveSettings } = useSettings();
+export function ChatContainer({ activeChat, onChatChangeAction }: ChatContainerProps) {
+  const {
+    messages,
+    isLoading,
+    sendMessage,
+    regenerateLastResponse,
+    hasStartedChat,
+    clearChatHistory,
+  } = useChat(activeChat);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
@@ -48,9 +52,9 @@ export function ChatContainer({ activeChat, setActiveChat }: ChatContainerProps)
     <>
       <SettingsModal
         isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
+        onCloseAction={() => setIsSettingsOpen(false)}
         activeChat={activeChat}
-        clearChatHistory={clearChatHistory}
+        clearChatHistoryAction={clearChatHistory}
       />
 
       {isInitialLoad && (
@@ -87,6 +91,7 @@ export function ChatContainer({ activeChat, setActiveChat }: ChatContainerProps)
               introMessage={introMessages[activeChat]}
               hasStartedChat={hasStartedChat}
               activeChat={activeChat}
+              onRegenerateAction={regenerateLastResponse}
             />
             <div ref={messagesEndRef} className="h-4 flex-shrink-0" />
           </div>
@@ -95,10 +100,10 @@ export function ChatContainer({ activeChat, setActiveChat }: ChatContainerProps)
         <div className="flex-shrink-0 p-4 pb-6">
           <div className="mx-auto max-w-3xl">
             <ChatInput
-              onSend={sendMessage}
+              onSendAction={sendMessage}
               isLoading={isLoading}
               activeChat={activeChat}
-              setActiveChat={setActiveChat}
+              onChatChangeAction={onChatChangeAction}
             />
           </div>
         </div>

@@ -7,16 +7,16 @@ import { Textarea } from "@/components/ui/textarea";
 
 interface SettingsCustomizationProps {
   tabName: string;
-  setTabName: (name: string) => void;
+  onTabNameChangeAction: (name: string) => void;
   systemPrompt: string;
-  setSystemPrompt: (prompt: string) => void;
+  onSystemPromptChangeAction: (prompt: string) => void;
 }
 
 export function SettingsCustomization({
   tabName,
-  setTabName,
+  onTabNameChangeAction,
   systemPrompt,
-  setSystemPrompt,
+  onSystemPromptChangeAction,
 }: SettingsCustomizationProps) {
   const { promptLines, promptChars } = useMemo(() => {
     return {
@@ -32,7 +32,7 @@ export function SettingsCustomization({
         <Input
           id="tab-name"
           value={tabName}
-          onChange={(e) => setTabName(e.target.value)}
+          onChange={(e) => onTabNameChangeAction(e.target.value)}
           placeholder="e.g., Glitch, My Custom Chat"
         />
       </div>
@@ -46,7 +46,7 @@ export function SettingsCustomization({
         <Textarea
           id="system-prompt"
           value={systemPrompt}
-          onChange={(e) => setSystemPrompt(e.target.value)}
+          onChange={(e) => onSystemPromptChangeAction(e.target.value)}
           placeholder="System prompt for the AI..."
           className="flex-1 resize-none text-xs font-mono"
         />

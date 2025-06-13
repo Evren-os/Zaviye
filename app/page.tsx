@@ -16,7 +16,7 @@ export default function Home() {
   return (
     <SettingsProvider>
       <main className="flex min-h-screen flex-col items-center justify-between bg-background">
-        <ChatContainer activeChat={activeChat} setActiveChat={setActiveChat} />
+        <ChatContainer activeChat={activeChat} onChatChangeAction={setActiveChat} />
       </main>
       <Toaster richColors position="top-center" />
     </SettingsProvider>

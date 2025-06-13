@@ -59,14 +59,46 @@ export function useChat(chatType: ChatType) {
       };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
-      // Catch the error and display a toast notification
       if (error instanceof Error) {
-        toast.error(error.message, {
-          duration: 1500,
-        });
+        toast.error(error.message, { duration: 1500 });
       }
       // Remove the last user message on error
       setMessages((prev) => prev.slice(0, -1));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const regenerateLastResponse = async () => {
+    const lastUserMessage = [...messages].reverse().find((m) => m.role === "user");
+    if (!lastUserMessage) {
+      toast.error("Could not find a message to regenerate.");
+      return;
+    }
+
+    // Remove the last AI response to prepare for the new one
+    setMessages((prev) => prev.slice(0, -1));
+    setIsLoading(true);
+
+    try {
+      const { prompt: systemPrompt } = getEffectiveSettings(chatType);
+      const response = await generateContent({
+        systemPrompt,
+        userPrompt: lastUserMessage.content,
+      });
+      const assistantMessage: Message = {
+        id: generateId(),
+        role: "assistant",
+        content: response,
+        timestamp: Date.now(),
+      };
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message, { duration: 1500 });
+      }
+      // If regeneration fails, we don't re-add the old response,
+      // allowing the user to try regenerating again.
     } finally {
       setIsLoading(false);
     }
@@ -81,6 +113,7 @@ export function useChat(chatType: ChatType) {
     messages,
     isLoading,
     sendMessage,
+    regenerateLastResponse,
     hasStartedChat,
     clearChatHistory,
   };

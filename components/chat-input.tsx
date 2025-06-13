@@ -10,13 +10,18 @@ import { cn } from "@/lib/utils";
 import { useSettings } from "@/hooks/use-settings";
 
 interface ChatInputProps {
-  onSend: (message: string) => void;
+  onSendAction: (message: string) => void;
   isLoading: boolean;
   activeChat: ChatType;
-  setActiveChat: (chat: ChatType) => void;
+  onChatChangeAction: (chat: ChatType) => void;
 }
 
-export function ChatInput({ onSend, isLoading, activeChat, setActiveChat }: ChatInputProps) {
+export function ChatInput({
+  onSendAction,
+  isLoading,
+  activeChat,
+  onChatChangeAction,
+}: ChatInputProps) {
   const [input, setInput] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -34,7 +39,7 @@ export function ChatInput({ onSend, isLoading, activeChat, setActiveChat }: Chat
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim() && !isLoading) {
-      onSend(input.trim());
+      onSendAction(input.trim());
       setInput("");
       if (textareaRef.current) {
         textareaRef.current.style.height = "80px";
@@ -97,7 +102,7 @@ export function ChatInput({ onSend, isLoading, activeChat, setActiveChat }: Chat
             {tabs.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveChat(tab.id)}
+                onClick={() => onChatChangeAction(tab.id)}
                 type="button"
                 className={cn(
                   "relative flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 ease-out overflow-hidden",
