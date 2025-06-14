@@ -34,6 +34,7 @@ export function ChatInput({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { getEffectiveSettings } = useSettings();
   const isMobile = useIsMobile();
+  const activeChatSettings = getEffectiveSettings(activeChat);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -101,7 +102,7 @@ export function ChatInput({
             onKeyDown={handleKeyDown}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
-            placeholder="Type your message..."
+            placeholder={activeChatSettings.placeholder || "Type your message..."}
             className="no-focus-outline resize-none border-0 bg-transparent text-sm placeholder:text-muted-foreground/60 min-h-[80px] transition-all duration-200"
             disabled={isLoading}
           />

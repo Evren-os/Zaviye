@@ -49,8 +49,10 @@ export function useChat(chatType: ChatType) {
     setIsLoading(true);
 
     try {
-      const { prompt: systemPrompt } = getEffectiveSettings(chatType);
-      const response = await generateContent({ systemPrompt, userPrompt: content });
+      const { prompt: systemPrompt, inputFormatter } = getEffectiveSettings(chatType);
+      const userPrompt = inputFormatter === "braces" ? `{${content}}` : content;
+
+      const response = await generateContent({ systemPrompt, userPrompt });
       const assistantMessage: Message = {
         id: generateId(),
         role: "assistant",
@@ -81,10 +83,13 @@ export function useChat(chatType: ChatType) {
     setIsLoading(true);
 
     try {
-      const { prompt: systemPrompt } = getEffectiveSettings(chatType);
+      const { prompt: systemPrompt, inputFormatter } = getEffectiveSettings(chatType);
+      const content = lastUserMessage.content;
+      const userPrompt = inputFormatter === "braces" ? `{${content}}` : content;
+
       const response = await generateContent({
         systemPrompt,
-        userPrompt: lastUserMessage.content,
+        userPrompt,
       });
       const assistantMessage: Message = {
         id: generateId(),
@@ -97,8 +102,6 @@ export function useChat(chatType: ChatType) {
       if (error instanceof Error) {
         toast.error(error.message, { duration: 1500 });
       }
-      // If regeneration fails, we don't re-add the old response,
-      // allowing the user to try regenerating again.
     } finally {
       setIsLoading(false);
     }

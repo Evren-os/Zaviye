@@ -5,9 +5,24 @@ import type { AllChatSettings, ChatSettings, ChatType } from "@/lib/types";
 import { systemPrompts } from "@/lib/system-prompts";
 
 const DEFAULT_SETTINGS: AllChatSettings = {
-  glitch: { name: "Glitch", prompt: systemPrompts.glitch },
-  blame: { name: "Blame", prompt: systemPrompts.blame },
-  reson: { name: "Reson", prompt: systemPrompts.reson },
+  glitch: {
+    name: "Glitch",
+    prompt: systemPrompts.glitch,
+    inputFormatter: "braces",
+    placeholder: "Enter formal text to convert...",
+  },
+  blame: {
+    name: "Blame",
+    prompt: systemPrompts.blame,
+    inputFormatter: "braces",
+    placeholder: "Paste git status, changed files, and a description...",
+  },
+  reson: {
+    name: "Reson",
+    prompt: systemPrompts.reson,
+    inputFormatter: "braces",
+    placeholder: "Enter words to pronounce, e.g., onomatopoeia, ambiguous",
+  },
 };
 
 const SETTINGS_STORAGE_KEY = "zaviye-chat-settings";
@@ -25,7 +40,7 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
   const [customSettings, setCustomSettings] = useState<Partial<AllChatSettings>>({});
   const [isMounted, setIsMounted] = useState(false);
 
-  // Load from localStorage only on the client, after the component has mounted.
+  // Load from localStorage only on the client, after the component has mounted
   useEffect(() => {
     setIsMounted(true);
     try {
@@ -38,7 +53,7 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
     }
   }, []);
 
-  // Save to localStorage whenever customSettings change.
+  // Save to localStorage whenever customSettings change
   useEffect(() => {
     if (!isMounted) return;
 
@@ -55,7 +70,7 @@ export const SettingsProvider = ({ children }: { children: React.ReactNode }) =>
 
   const getEffectiveSettings = useCallback(
     (chatType: ChatType): ChatSettings => {
-      // On the server or before the client has mounted, always return default settings.
+      // On the server or before the client has mounted, always return default settings
       if (!isMounted) {
         return DEFAULT_SETTINGS[chatType];
       }

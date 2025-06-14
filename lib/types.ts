@@ -32,6 +32,8 @@ export interface TabDescriptions {
 export interface ChatSettings {
   name: string;
   prompt: string;
+  inputFormatter?: "braces" | "none";
+  placeholder?: string;
 }
 
 export type AllChatSettings = Record<ChatType, ChatSettings>;
