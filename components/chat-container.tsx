@@ -70,7 +70,7 @@ export function ChatContainer({ activeChat, onChatChangeAction }: ChatContainerP
         </div>
       )}
 
-      <div className="h-screen w-full flex flex-col overflow-hidden relative">
+      <div className="h-dvh w-full flex flex-col overflow-hidden relative">
         <header className="absolute top-0 left-0 p-2 md:p-4 z-10">
           <Button
             variant="ghost"

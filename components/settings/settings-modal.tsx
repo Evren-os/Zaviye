@@ -137,7 +137,7 @@ export function SettingsModal({
     <Dialog open={isOpen} onOpenChange={onCloseAction}>
       <DialogContent
         className={cn(
-          "h-screen w-screen max-h-screen max-w-full rounded-none border-none",
+          "h-dvh w-screen max-h-dvh max-w-full rounded-none border-none",
           "sm:h-[90vh] sm:max-h-[700px] sm:w-[95vw] sm:max-w-4xl sm:rounded-lg sm:border sm:ring-1 sm:ring-primary/40",
           "p-0 flex flex-col gap-0",
         )}
