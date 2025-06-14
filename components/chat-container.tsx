@@ -9,6 +9,7 @@ import { introMessages } from "@/lib/system-prompts";
 import { SettingsModal } from "./settings/settings-modal";
 import { Button } from "./ui/button";
 import { SettingsIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ChatContainerProps {
   activeChat: ChatType;
@@ -26,15 +27,7 @@ export function ChatContainer({ activeChat, onChatChangeAction }: ChatContainerP
   } = useChat(activeChat);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsInitialLoad(false);
-    }, 1200);
-    return () => clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
     if (messagesEndRef.current && messagesContainerRef.current) {
@@ -57,20 +50,12 @@ export function ChatContainer({ activeChat, onChatChangeAction }: ChatContainerP
         clearChatHistoryAction={clearChatHistory}
       />
 
-      {isInitialLoad && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/98 backdrop-blur-md">
-          <div className="zaviye-logo-container">
-            <div className="zaviye-logo text-5xl font-bold tracking-tight">Zaviye</div>
-            <div className="zaviye-particles">
-              <div className="particle particle-1"></div>
-              <div className="particle particle-2"></div>
-              <div className="particle particle-3"></div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="h-dvh w-full flex flex-col overflow-hidden relative">
+      <div
+        className={cn(
+          "h-dvh w-full flex flex-col overflow-hidden relative",
+          "animate-in fade-in duration-500",
+        )}
+      >
         <header className="absolute top-0 left-0 p-2 md:p-4 z-10">
           <Button
             variant="ghost"
