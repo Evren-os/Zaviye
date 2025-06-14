@@ -18,6 +18,7 @@ import { ArrowLeft, RotateCcw } from "lucide-react";
 import type { ChatType } from "@/lib/types";
 import { useSettings } from "@/hooks/use-settings";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -134,7 +135,13 @@ export function SettingsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onCloseAction}>
-      <DialogContent className="sm:max-w-4xl w-[95vw] h-[90vh] max-h-[700px] p-0 flex flex-col gap-0">
+      <DialogContent
+        className={cn(
+          "h-screen w-screen max-h-screen max-w-full rounded-none border-none",
+          "sm:h-[90vh] sm:max-h-[700px] sm:w-[95vw] sm:max-w-4xl sm:rounded-lg sm:border sm:ring-1 sm:ring-primary/40",
+          "p-0 flex flex-col gap-0",
+        )}
+      >
         <DialogHeader className="p-6 pb-0">
           <DialogTitle className="text-xl">
             Settings for{" "}
@@ -169,16 +176,16 @@ export function SettingsModal({
         </div>
 
         {(!isMobile || mobileView === "content") && (
-          <DialogFooter className="p-4 border-t flex-row justify-between items-center">
+          <DialogFooter className="p-4 border-t flex flex-col-reverse sm:flex-row sm:justify-between items-center gap-2">
             <Button variant="ghost" onClick={handleResetToDefaults}>
               <RotateCcw className="mr-2 h-4 w-4" />
               Reset to Default
             </Button>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={onCloseAction}>
+            <div className="flex gap-2 w-full sm:w-auto justify-end">
+              <Button variant="outline" onClick={onCloseAction} className="flex-1 sm:flex-none">
                 Cancel
               </Button>
-              <Button onClick={handleSave} disabled={!isDirty}>
+              <Button onClick={handleSave} disabled={!isDirty} className="flex-1 sm:flex-none">
                 Save Changes
               </Button>
             </div>

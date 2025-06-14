@@ -4,10 +4,17 @@ import type React from "react";
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { SendIcon, ZapIcon, GitBranchIcon, VolumeXIcon } from "lucide-react";
+import { SendIcon, ZapIcon, GitBranchIcon, VolumeXIcon, ChevronDown } from "lucide-react";
 import type { ChatType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useSettings } from "@/hooks/use-settings";
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ChatInputProps {
   onSendAction: (message: string) => void;
@@ -26,6 +33,7 @@ export function ChatInput({
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { getEffectiveSettings } = useSettings();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -74,6 +82,8 @@ export function ChatInput({
     },
   ];
 
+  const activeTab = tabs.find((tab) => tab.id === activeChat);
+
   return (
     <div className="relative">
       <form
@@ -99,29 +109,55 @@ export function ChatInput({
 
         <div className="flex items-center justify-between p-3 pt-0">
           <div className="flex items-center gap-2">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => onChatChangeAction(tab.id)}
-                type="button"
-                className={cn(
-                  "relative flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 ease-out overflow-hidden",
-                  activeChat === tab.id
-                    ? "bg-primary/8 text-primary border border-primary/20 tab-active"
-                    : "text-muted-foreground hover:bg-muted/30 hover:text-foreground border border-transparent hover:border-muted/30",
-                )}
-              >
-                {activeChat === tab.id && (
-                  <>
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 rounded-lg animate-pulse" />
-                    <div className="absolute inset-[1px] bg-gradient-to-r from-transparent via-primary/8 to-transparent rounded-[7px]" />
-                  </>
-                )}
-
-                <span className="relative z-10 flex items-center justify-center">{tab.icon}</span>
-                <span className="relative z-10">{tab.label}</span>
-              </button>
-            ))}
+            {isMobile ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2 rounded-lg border-primary/20 bg-primary/5 text-primary hover:bg-primary/10"
+                  >
+                    {activeTab?.icon}
+                    <span>{activeTab?.label}</span>
+                    <ChevronDown className="h-4 w-4 opacity-70" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  {tabs.map((tab) => (
+                    <DropdownMenuItem
+                      key={tab.id}
+                      onClick={() => onChatChangeAction(tab.id)}
+                      className={cn(activeChat === tab.id && "bg-muted")}
+                    >
+                      {tab.icon}
+                      <span>{tab.label}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => onChatChangeAction(tab.id)}
+                  type="button"
+                  className={cn(
+                    "relative flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-all duration-300 ease-out overflow-hidden",
+                    activeChat === tab.id
+                      ? "bg-primary/8 text-primary border border-primary/20 tab-active"
+                      : "text-muted-foreground hover:bg-muted/30 hover:text-foreground border border-transparent hover:border-muted/30",
+                  )}
+                >
+                  {activeChat === tab.id && (
+                    <>
+                      <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 rounded-lg animate-pulse" />
+                      <div className="absolute inset-[1px] bg-gradient-to-r from-transparent via-primary/8 to-transparent rounded-[7px]" />
+                    </>
+                  )}
+                  <span className="relative z-10 flex items-center justify-center">{tab.icon}</span>
+                  <span className="relative z-10">{tab.label}</span>
+                </button>
+              ))
+            )}
           </div>
 
           <Button

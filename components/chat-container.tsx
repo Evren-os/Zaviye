@@ -71,7 +71,7 @@ export function ChatContainer({ activeChat, onChatChangeAction }: ChatContainerP
       )}
 
       <div className="h-screen w-full flex flex-col overflow-hidden relative">
-        <header className="absolute top-0 left-0 p-4 z-10">
+        <header className="absolute top-0 left-0 p-2 md:p-4 z-10">
           <Button
             variant="ghost"
             size="icon"
@@ -83,7 +83,10 @@ export function ChatContainer({ activeChat, onChatChangeAction }: ChatContainerP
           </Button>
         </header>
 
-        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 messages-container">
+        <div
+          ref={messagesContainerRef}
+          className="flex-1 overflow-y-auto p-2 md:p-4 messages-container"
+        >
           <div className="mx-auto max-w-3xl h-full">
             <ChatMessages
               messages={messages}
@@ -97,7 +100,7 @@ export function ChatContainer({ activeChat, onChatChangeAction }: ChatContainerP
           </div>
         </div>
 
-        <div className="flex-shrink-0 p-4 pb-6">
+        <div className="flex-shrink-0 p-2 pb-4 md:p-4 md:pb-6">
           <div className="mx-auto max-w-3xl">
             <ChatInput
               onSendAction={sendMessage}

@@ -65,7 +65,7 @@ export function ChatMessages({
       {shouldShowIntro ? (
         <div className="flex items-center justify-center flex-1">
           <div className="max-w-md text-center space-y-5 animate-in fade-in-50 slide-in-from-bottom-4 duration-500">
-            <div className="bg-muted/30 backdrop-blur-sm rounded-xl p-5 border">
+            <div className="bg-muted/30 backdrop-blur-sm rounded-xl p-4 sm:p-5 border">
               <h3 className="text-lg font-semibold mb-2 text-foreground">
                 {activeChat.charAt(0).toUpperCase() + activeChat.slice(1)}
               </h3>
