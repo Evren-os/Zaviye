@@ -98,7 +98,7 @@ export function ChatMessages({
           <p className="text-center text-muted-foreground text-sm">Start a conversation...</p>
         </div>
       ) : (
-        <div className="space-y-4 py-4 flex-1 overflow-y-auto">
+        <div className="space-y-4 py-4">
           {messages.map((message, index) => {
             const isLastMessage = index === messages.length - 1;
             const canRegenerate = message.role === "assistant" && isLastMessage && !isLoading;

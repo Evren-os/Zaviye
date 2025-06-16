@@ -35,6 +35,7 @@ export function ChatContainer({ activeChat, onChatChangeAction }: ChatContainerP
       const scrollHeight = container.scrollHeight;
       const height = container.clientHeight;
       const maxScrollTop = scrollHeight - height;
+      // Only auto-scroll if the user is already near the bottom
       if (container.scrollTop > maxScrollTop - 100) {
         messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
       }
@@ -68,11 +69,8 @@ export function ChatContainer({ activeChat, onChatChangeAction }: ChatContainerP
           </Button>
         </header>
 
-        <div
-          ref={messagesContainerRef}
-          className="flex-1 overflow-y-auto p-2 md:p-4 messages-container"
-        >
-          <div className="mx-auto max-w-3xl h-full">
+        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto messages-container">
+          <div className="mx-auto max-w-3xl h-full p-2 md:p-4">
             <ChatMessages
               messages={messages}
               isLoading={isLoading}
