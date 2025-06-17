@@ -2,18 +2,13 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { CopyIcon, RefreshCwIcon } from "lucide-react";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
 import { cn } from "@/lib/utils";
 import { LoadingDots } from "@/components/loading-dots";
 import { tabDescriptions } from "@/lib/system-prompts";
 import type { Message, ChatType } from "@/lib/types";
 import { CodeBlock } from "./code-block";
+import { MessageActionsToolbar } from "./message-actions-toolbar";
+import { useIsMobile } from "@/components/ui/use-mobile";
 
 interface ChatMessagesProps {
   messages: Message[];
@@ -35,7 +30,7 @@ const parseMessageContent = (content: string) => {
       }
       return { type: "text" as const, content: part };
     })
-    .filter((part) => part.content.length > 0); // Remove any empty parts.
+    .filter((part) => part.content.length > 0);
 };
 
 export function ChatMessages({
@@ -47,6 +42,8 @@ export function ChatMessages({
   onRegenerateAction,
 }: ChatMessagesProps) {
   const [expandedDescription, setExpandedDescription] = useState(false);
+  const [activeToolbarId, setActiveToolbarId] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -58,10 +55,23 @@ export function ChatMessages({
     }
   };
 
+  const handleContainerClick = () => {
+    if (activeToolbarId) {
+      setActiveToolbarId(null);
+    }
+  };
+
+  const handleMessageClick = (e: React.MouseEvent, messageId: string) => {
+    if (isMobile) {
+      e.stopPropagation();
+      setActiveToolbarId(activeToolbarId === messageId ? null : messageId);
+    }
+  };
+
   const shouldShowIntro = !hasStartedChat && !isLoading && introMessage;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full" onClick={handleContainerClick}>
       {shouldShowIntro ? (
         <div className="flex items-center justify-center flex-1">
           <div className="max-w-md text-center space-y-5 animate-in fade-in-50 slide-in-from-bottom-4 duration-500">
@@ -98,53 +108,55 @@ export function ChatMessages({
           <p className="text-center text-muted-foreground text-sm">Start a conversation...</p>
         </div>
       ) : (
-        <div className="space-y-4 py-4">
+        <div className="space-y-3 py-4">
           {messages.map((message, index) => {
             const isLastMessage = index === messages.length - 1;
-            const canRegenerate = message.role === "assistant" && isLastMessage && !isLoading;
             const messageParts = parseMessageContent(message.content);
 
             return (
               <div
                 key={message.id}
                 className={cn(
-                  "group/message flex w-full message-item",
-                  message.role === "user" ? "justify-end" : "justify-start",
+                  "group/message flex w-full flex-col gap-[7px]",
+                  message.role === "user" ? "items-end" : "items-start",
                 )}
-                style={{ animationDelay: `${index * 30}ms` }}
+                onMouseEnter={!isMobile ? () => setActiveToolbarId(message.id) : undefined}
+                onMouseLeave={!isMobile ? () => setActiveToolbarId(null) : undefined}
               >
-                <ContextMenu>
-                  <ContextMenuTrigger
-                    className={cn(
-                      "relative max-w-[85%] rounded-xl px-3.5 py-2.5 transition-all duration-300 text-left",
-                      message.role === "user"
-                        ? "bg-primary text-primary-foreground shadow-md"
-                        : "bg-muted/80 backdrop-blur-sm border shadow-sm",
+                <div
+                  className={cn(
+                    "relative max-w-[85%] rounded-xl px-3.5 py-2.5 transition-all duration-300 text-left",
+                    message.role === "user"
+                      ? "bg-primary text-primary-foreground shadow-md"
+                      : "bg-muted/80 backdrop-blur-sm border shadow-sm",
+                    isMobile && "cursor-pointer",
+                  )}
+                  onClick={(e) => handleMessageClick(e, message.id)}
+                >
+                  <div className="prose-xs text-sm break-words whitespace-pre-wrap">
+                    {messageParts.map((part, partIndex) =>
+                      part.type === "code" ? (
+                        <CodeBlock key={partIndex} code={part.content} />
+                      ) : (
+                        <span key={partIndex}>{part.content}</span>
+                      ),
                     )}
-                  >
-                    <div className="prose-xs text-sm break-words whitespace-pre-wrap">
-                      {messageParts.map((part, partIndex) =>
-                        part.type === "code" ? (
-                          <CodeBlock key={partIndex} code={part.content} />
-                        ) : (
-                          <span key={partIndex}>{part.content}</span>
-                        ),
-                      )}
-                    </div>
-                  </ContextMenuTrigger>
-                  <ContextMenuContent>
-                    <ContextMenuItem onClick={() => copyToClipboard(message.content)}>
-                      <CopyIcon className="mr-2 h-4 w-4" />
-                      <span>Copy</span>
-                    </ContextMenuItem>
-                    {canRegenerate && (
-                      <ContextMenuItem onClick={onRegenerateAction}>
-                        <RefreshCwIcon className="mr-2 h-4 w-4" />
-                        <span>Regenerate</span>
-                      </ContextMenuItem>
-                    )}
-                  </ContextMenuContent>
-                </ContextMenu>
+                  </div>
+                </div>
+                <MessageActionsToolbar
+                  message={message}
+                  isLastMessage={isLastMessage}
+                  isLoading={isLoading}
+                  isVisible={activeToolbarId === message.id}
+                  onCopyAction={() => {
+                    copyToClipboard(message.content);
+                    setActiveToolbarId(null);
+                  }}
+                  onRegenerateAction={() => {
+                    onRegenerateAction();
+                    setActiveToolbarId(null);
+                  }}
+                />
               </div>
             );
           })}
