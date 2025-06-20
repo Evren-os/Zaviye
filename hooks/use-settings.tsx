@@ -8,19 +8,16 @@ const DEFAULT_SETTINGS: AllChatSettings = {
   glitch: {
     name: "Glitch",
     prompt: systemPrompts.glitch,
-    inputFormatter: "braces",
     placeholder: "Enter formal text to convert...",
   },
   blame: {
     name: "Blame",
     prompt: systemPrompts.blame,
-    inputFormatter: "braces",
     placeholder: "Paste git status, changed files, and a description...",
   },
   reson: {
     name: "Reson",
     prompt: systemPrompts.reson,
-    inputFormatter: "braces",
     placeholder: "Enter words to pronounce, e.g., onomatopoeia, ambiguous",
   },
 };

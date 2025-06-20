@@ -49,8 +49,8 @@ export function useChat(chatType: ChatType) {
     setIsLoading(true);
 
     try {
-      const { prompt: systemPrompt, inputFormatter } = getEffectiveSettings(chatType);
-      const userPrompt = inputFormatter === "braces" ? `{${content}}` : content;
+      const { prompt: systemPrompt } = getEffectiveSettings(chatType);
+      const userPrompt = content;
 
       const response = await generateContent({ systemPrompt, userPrompt });
       const assistantMessage: Message = {
@@ -83,9 +83,8 @@ export function useChat(chatType: ChatType) {
     setIsLoading(true);
 
     try {
-      const { prompt: systemPrompt, inputFormatter } = getEffectiveSettings(chatType);
-      const content = lastUserMessage.content;
-      const userPrompt = inputFormatter === "braces" ? `{${content}}` : content;
+      const { prompt: systemPrompt } = getEffectiveSettings(chatType);
+      const userPrompt = lastUserMessage.content;
 
       const response = await generateContent({
         systemPrompt,

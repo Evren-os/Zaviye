@@ -32,7 +32,6 @@ export interface TabDescriptions {
 export interface ChatSettings {
   name: string;
   prompt: string;
-  inputFormatter?: "braces" | "none";
   placeholder?: string;
 }
 
