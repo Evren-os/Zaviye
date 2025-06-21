@@ -1,11 +1,13 @@
 export interface GenerateContentParams {
   systemPrompt: string;
   userPrompt: string;
+  signal?: AbortSignal;
 }
 
 export async function generateContent({
   systemPrompt,
   userPrompt,
+  signal,
 }: GenerateContentParams): Promise<string> {
   try {
     const response = await fetch("/api/gemini", {
@@ -14,11 +16,14 @@ export async function generateContent({
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ systemPrompt, userPrompt }),
+      signal, // Pass the signal to the fetch request
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `API Error: Status ${response.status}`);
+      throw new Error(
+        errorData.error || `API Error: Status ${response.status}`
+      );
     }
 
     const data = await response.json();
@@ -29,6 +34,11 @@ export async function generateContent({
 
     return data.text;
   } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      console.log("Fetch aborted by user.");
+      // Re-throw the abort error so it can be caught and handled upstream
+      throw error;
+    }
     console.error("Error in generateContent:", error);
     if (error instanceof Error) {
       throw error;
@@ -61,7 +71,7 @@ export async function checkApiHealth(): Promise<boolean> {
 // Retry logic for failed requests
 export async function generateContentWithRetry(
   params: GenerateContentParams,
-  maxRetries = 3,
+  maxRetries = 3
 ): Promise<string> {
   let lastError: Error | null = null;
 
@@ -72,7 +82,10 @@ export async function generateContentWithRetry(
       lastError = error as Error;
       console.warn(`Attempt ${attempt} failed:`, error);
 
-      if (error instanceof Error && error.message.includes("401")) {
+      if (
+        error instanceof Error &&
+        (error.message.includes("401") || error.name === "AbortError")
+      ) {
         break;
       }
 

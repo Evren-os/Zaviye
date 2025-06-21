@@ -1,13 +1,16 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { toast } from "sonner";
-import type { Message, ChatType } from "@/lib/types";
-import { generateContent } from "@/lib/gemini";
 import { useSettings } from "@/hooks/use-settings";
+import { generateContent } from "@/lib/gemini";
+import type { ChatType, Message } from "@/lib/types";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 function generateId() {
-  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  return (
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15)
+  );
 }
 
 export function useChat(chatType: ChatType) {
@@ -15,6 +18,7 @@ export function useChat(chatType: ChatType) {
   const [isLoading, setIsLoading] = useState(false);
   const [hasStartedChat, setHasStartedChat] = useState(false);
   const { getEffectiveSettings } = useSettings();
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     const savedMessages = localStorage.getItem(`zaviye-${chatType}-messages`);
@@ -33,62 +37,48 @@ export function useChat(chatType: ChatType) {
   }, [chatType]);
 
   useEffect(() => {
-    localStorage.setItem(`zaviye-${chatType}-messages`, JSON.stringify(messages));
+    localStorage.setItem(
+      `zaviye-${chatType}-messages`,
+      JSON.stringify(messages)
+    );
   }, [messages, chatType]);
 
   useEffect(() => {
-    localStorage.setItem(`zaviye-${chatType}-started`, JSON.stringify(hasStartedChat));
+    localStorage.setItem(
+      `zaviye-${chatType}-started`,
+      JSON.stringify(hasStartedChat)
+    );
   }, [hasStartedChat, chatType]);
+
+  const stopGeneration = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+  }, []);
 
   const sendMessage = async (content: string) => {
     if (!content.trim()) return;
+    if (isLoading) stopGeneration();
     if (!hasStartedChat) setHasStartedChat(true);
 
-    const userMessage: Message = { id: generateId(), role: "user", content, timestamp: Date.now() };
+    const userMessage: Message = {
+      id: generateId(),
+      role: "user",
+      content,
+      timestamp: Date.now(),
+    };
     setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
 
-    try {
-      const { prompt: systemPrompt } = getEffectiveSettings(chatType);
-      const userPrompt = content;
-
-      const response = await generateContent({ systemPrompt, userPrompt });
-      const assistantMessage: Message = {
-        id: generateId(),
-        role: "assistant",
-        content: response,
-        timestamp: Date.now(),
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message, { duration: 1500 });
-      }
-      // Remove the last user message on error
-      setMessages((prev) => prev.slice(0, -1));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const regenerateLastResponse = async () => {
-    const lastUserMessage = [...messages].reverse().find((m) => m.role === "user");
-    if (!lastUserMessage) {
-      toast.error("Could not find a message to regenerate.");
-      return;
-    }
-
-    // Remove the last AI response to prepare for the new one
-    setMessages((prev) => prev.slice(0, -1));
-    setIsLoading(true);
+    abortControllerRef.current = new AbortController();
 
     try {
       const { prompt: systemPrompt } = getEffectiveSettings(chatType);
-      const userPrompt = lastUserMessage.content;
-
       const response = await generateContent({
         systemPrompt,
-        userPrompt,
+        userPrompt: content,
+        signal: abortControllerRef.current.signal,
       });
       const assistantMessage: Message = {
         id: generateId(),
@@ -98,11 +88,63 @@ export function useChat(chatType: ChatType) {
       };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        return;
+      }
+      if (error instanceof Error) {
+        toast.error(error.message, { duration: 1500 });
+      }
+      // Remove the last user message on error, except for abort.
+      setMessages((prev) => prev.slice(0, -1));
+    } finally {
+      setIsLoading(false);
+      abortControllerRef.current = null;
+    }
+  };
+
+  const regenerateLastResponse = async () => {
+    if (isLoading) stopGeneration();
+    const lastUserMessage = [...messages]
+      .reverse()
+      .find((m) => m.role === "user");
+    if (!lastUserMessage) {
+      toast.error("Could not find a message to regenerate.");
+      return;
+    }
+
+    setMessages((prev) =>
+      prev.filter(
+        (msg) =>
+          msg.role !== "assistant" || msg.timestamp < lastUserMessage.timestamp
+      )
+    );
+    setIsLoading(true);
+    abortControllerRef.current = new AbortController();
+
+    try {
+      const { prompt: systemPrompt } = getEffectiveSettings(chatType);
+      const response = await generateContent({
+        systemPrompt,
+        userPrompt: lastUserMessage.content,
+        signal: abortControllerRef.current.signal,
+      });
+      const assistantMessage: Message = {
+        id: generateId(),
+        role: "assistant",
+        content: response,
+        timestamp: Date.now(),
+      };
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        return;
+      }
       if (error instanceof Error) {
         toast.error(error.message, { duration: 1500 });
       }
     } finally {
       setIsLoading(false);
+      abortControllerRef.current = null;
     }
   };
 
@@ -118,5 +160,6 @@ export function useChat(chatType: ChatType) {
     regenerateLastResponse,
     hasStartedChat,
     clearChatHistory,
+    stopGeneration,
   };
 }
